@@ -4,7 +4,7 @@ set -e # Stop script if any command fails
 
 echo "Starting installation..."
 
-echo "Creating backups..."
+echo "Creating backups and removing old setup..."
 backup_dir="$HOME/.setup-backup-$(date +%Y%m%d%H%M%S)"
 mkdir -p "$backup_dir"
 
@@ -12,12 +12,14 @@ backup_files=(
 	"$HOME/.zshrc"
 	"$HOME/.tmux.conf"
 	"$HOME/.config/nvim"
+	"$HOME/.zsh"
 )
 
 for file in "${backup_files[@]}"; do
 	if [ -e "$file" ]; then
 		echo "Backing up $file to $backup_dir"
 		cp -r "$file" "$backup_dir/"
+		rm -rf "$file"
 	fi
 done
 
@@ -39,9 +41,6 @@ trap rollback ERR # Run rollback function if the script fails
 echo "Installing dependencies..."
 brew install zsh git curl fzf bat eza tmux neovim
 
-echo "Setting Zsh as the default shell..."
-chsh -s $(which zsh)
-
 mkdir -p "$HOME/.zsh/plugins"
 mkdir -p "$HOME/.config/nvim/lua/plugins"
 
@@ -60,8 +59,8 @@ if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
 fi
 
 echo "Copying configuration files..."
-[ -f "zshrc.conf" ] && cp zshrc-config "$HOME/.zshrc"
-[ -f "tmux.conf" ] && cp tmux-config "$HOME/.tmux.conf"
+[ -f "zshrc.conf" ] && cp zshrc.conf "$HOME/.zshrc"
+[ -f "tmux.conf" ] && cp tmux.conf "$HOME/.tmux.conf"
 
 echo "Installing Tmux plugins..."
 "$HOME/.tmux/plugins/tpm/bin/install_plugins"
